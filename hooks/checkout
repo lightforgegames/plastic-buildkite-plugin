@@ -1,0 +1,4 @@
+#!/bin/bash
+set -euo pipefail
+hook_root="${BASH_SOURCE%/*}"
+${hook_root}/checkout-bin
