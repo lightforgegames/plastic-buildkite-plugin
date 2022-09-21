@@ -39,14 +39,16 @@ func main() {
 		repoPath := os.Getenv("BUILDKITE_REPO")
 		pipelineName := os.Getenv("BUILDKITE_PIPELINE_NAME")
 		agentId := os.Getenv("BUILDKITE_AGENT_ID")
+
 		workspaceName := fmt.Sprintf("buildkite-%s-%s", pipelineName, agentId)
+		fmt.Printf("Creating workspace %q for repository %q", workspaceName, repoPath)
 		out, err := exec.Command("cm", "workspace", "create", workspaceName, ".", "--repository="+repoPath).CombinedOutput()
 		if err != nil {
 			fmt.Printf("Failed to create workspace `%s`: %v.\n%s", workspaceName, err, string(out))
 			os.Exit(1)
 		}
 	} else {
-		fmt.Println("Cleaning workspace...")
+		fmt.Printf("Cleaning existing workspace...")
 		if out, err := exec.Command("cm", "undo", ".", "-R").CombinedOutput(); err != nil {
 			fmt.Printf("Failed to undo changes: : %v.\n%s", err, string(out))
 			os.Exit(1)
