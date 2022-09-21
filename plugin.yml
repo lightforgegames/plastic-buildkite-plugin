@@ -1,3 +1,4 @@
-name: PlasticSCM Support
-description: Checks out a PlasticSCM repository instead of a git repository
+---
+name: PlasticSCM
+description: Checks out a PlasticSCM repository instead of a git repository.
 author: https://github.com/lightforgegames
