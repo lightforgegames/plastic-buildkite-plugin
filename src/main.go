@@ -33,7 +33,7 @@ func get_comment(changeset int, branch string) (string, error) {
 func main() {
 
 	cd, _ := os.Getwd()
-	if workspacePath, found := os.LookupEnv("BUILDKITE_PLUGIN_PLASTICSCM_WORKSPACEPATH"); found {
+	if workspacePath, found := os.LookupEnv("BUILDKITE_PLUGIN_PLASTIC_WORKSPACEPATH"); found {
 		fmt.Printf("Using overridden workspace path %q", workspacePath)
 		_ = os.Chdir(workspacePath)
 		cd = workspacePath
@@ -45,7 +45,7 @@ func main() {
 		repoPath := os.Getenv("BUILDKITE_REPO")
 		pipelineName := os.Getenv("BUILDKITE_PIPELINE_NAME")
 
-		workspaceName, found := os.LookupEnv("BUILDKITE_PLUGIN_PLASTICSCM_WORKSPACENAME")
+		workspaceName, found := os.LookupEnv("BUILDKITE_PLUGIN_PLASTIC_WORKSPACENAME")
 		if !found {
 			workspaceName = fmt.Sprintf("buildkite-%s", pipelineName)
 		}
