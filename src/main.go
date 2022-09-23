@@ -31,16 +31,25 @@ func get_comment(changeset int, branch string) (string, error) {
 }
 
 func main() {
+
 	cd, _ := os.Getwd()
+	if workspacePath, found := os.LookupEnv("BUILDKITE_PLUGIN_PLASTICSCM_WORKSPACEPATH"); found {
+		fmt.Printf("Using overridden workspace path %q", workspacePath)
+		_ = os.Chdir(workspacePath)
+		cd = workspacePath
+	}
 	fmt.Println("go: executing plastic plugin from " + cd)
 	_, err := exec.Command("cm", "ss").CombinedOutput()
 	if err != nil {
 		// cm ss failed, so we can set up a workspace here now.
 		repoPath := os.Getenv("BUILDKITE_REPO")
 		pipelineName := os.Getenv("BUILDKITE_PIPELINE_NAME")
-		agentId := os.Getenv("BUILDKITE_AGENT_ID")
 
-		workspaceName := fmt.Sprintf("buildkite-%s-%s", pipelineName, agentId)
+		workspaceName, found := os.LookupEnv("BUILDKITE_PLUGIN_PLASTICSCM_WORKSPACENAME")
+		if !found {
+			workspaceName = fmt.Sprintf("buildkite-%s", pipelineName)
+		}
+
 		fmt.Printf("Creating workspace %q for repository %q\n", workspaceName, repoPath)
 		out, err := exec.Command("cm", "workspace", "create", workspaceName, ".", "--repository="+repoPath).CombinedOutput()
 		if err != nil {

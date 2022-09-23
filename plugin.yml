@@ -2,3 +2,10 @@
 name: PlasticSCM
 description: Checks out a PlasticSCM repository instead of a git repository.
 author: https://github.com/lightforgegames
+requirements: []
+configuration:
+  properties:
+    workspacename:
+      type:  string
+    workspacepath:
+      type: string
