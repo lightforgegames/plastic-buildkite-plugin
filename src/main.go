@@ -31,10 +31,12 @@ func get_comment(changeset int, branch string) (string, error) {
 }
 
 func main() {
+	appDataPath := os.Getenv("LocalAppData")
+	fmt.Printf("Using Appdata: %q\n", appDataPath)
 
 	cd, _ := os.Getwd()
 	if workspacePath, found := os.LookupEnv("BUILDKITE_PLUGIN_PLASTIC_WORKSPACEPATH"); found {
-		fmt.Printf("Using overridden workspace path %q", workspacePath)
+		fmt.Printf("Using overridden workspace path %q\n", workspacePath)
 		_ = os.Chdir(workspacePath)
 		cd = workspacePath
 	}
