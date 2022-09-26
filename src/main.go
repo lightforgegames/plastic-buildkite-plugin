@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"strconv"
+	"strings"
 )
 
 func Shellout(command string) (string, string, error) {
@@ -58,8 +59,10 @@ func main() {
 	fmt.Printf("Creating workspace %q for repository %q\n", workspaceName, repoPath)
 	out, err := exec.Command("cm", "workspace", "create", workspaceName, ".", selectorString).CombinedOutput()
 	if err != nil {
-		fmt.Printf("Failed to create workspace `%s`: %v.\n%s", workspaceName, err, string(out))
-		os.Exit(1)
+		if !strings.Contains(string(out), "already exists.") {
+			fmt.Printf("Failed to create workspace `%s`: %v.\n%s", workspaceName, err, string(out))
+			os.Exit(1)
+		}
 	}
 
 	fmt.Println("Cleaning workspace of any changes...")
