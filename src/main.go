@@ -41,29 +41,31 @@ func main() {
 		cd = workspacePath
 	}
 	fmt.Println("go: executing plastic plugin from " + cd)
-	_, err := exec.Command("cm", "ss").CombinedOutput()
+	_, err := os.Stat(".plastic/plastic.selector")
+	selectorString := ""
+	if bHasSelector := err == nil; bHasSelector {
+		selectorString = "--selector=.plastic/plastic.selector"
+	}
+
+	repoPath := os.Getenv("BUILDKITE_REPO")
+	pipelineName := os.Getenv("BUILDKITE_PIPELINE_NAME")
+
+	workspaceName, found := os.LookupEnv("BUILDKITE_PLUGIN_PLASTIC_WORKSPACENAME")
+	if !found {
+		workspaceName = fmt.Sprintf("buildkite-%s", pipelineName)
+	}
+
+	fmt.Printf("Creating workspace %q for repository %q\n", workspaceName, repoPath)
+	out, err := exec.Command("cm", "workspace", "create", workspaceName, ".", selectorString).CombinedOutput()
 	if err != nil {
-		// cm ss failed, so we can set up a workspace here now.
-		repoPath := os.Getenv("BUILDKITE_REPO")
-		pipelineName := os.Getenv("BUILDKITE_PIPELINE_NAME")
+		fmt.Printf("Failed to create workspace `%s`: %v.\n%s", workspaceName, err, string(out))
+		os.Exit(1)
+	}
 
-		workspaceName, found := os.LookupEnv("BUILDKITE_PLUGIN_PLASTIC_WORKSPACENAME")
-		if !found {
-			workspaceName = fmt.Sprintf("buildkite-%s", pipelineName)
-		}
-
-		fmt.Printf("Creating workspace %q for repository %q\n", workspaceName, repoPath)
-		out, err := exec.Command("cm", "workspace", "create", workspaceName, ".", "--repository="+repoPath).CombinedOutput()
-		if err != nil {
-			fmt.Printf("Failed to create workspace `%s`: %v.\n%s", workspaceName, err, string(out))
-			os.Exit(1)
-		}
-	} else {
-		fmt.Printf("Cleaning existing workspace...\n")
-		if out, err := exec.Command("cm", "undo", ".", "-R").CombinedOutput(); err != nil {
-			fmt.Printf("Failed to undo changes: : %v.\n%s", err, string(out))
-			os.Exit(1)
-		}
+	fmt.Println("Cleaning workspace of any changes...")
+	if out, err := exec.Command("cm", "undo", ".", "-R").CombinedOutput(); err != nil {
+		fmt.Printf("Failed to undo changes: : %v.\n%s", err, string(out))
+		os.Exit(1)
 	}
 
 	// figure out our target branch and changeset.
