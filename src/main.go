@@ -36,6 +36,11 @@ func main() {
 	fmt.Printf("Using Appdata: %q\n", appDataPath)
 
 	cd, _ := os.Getwd()
+	// Return back to where we were when we're done!
+	defer func(dir string) {
+		_ = os.Chdir(dir)
+	}(cd)
+
 	if workspacePath, found := os.LookupEnv("BUILDKITE_PLUGIN_PLASTIC_WORKSPACEPATH"); found {
 		fmt.Printf("Using overridden workspace path %q\n", workspacePath)
 		_ = os.Chdir(workspacePath)
