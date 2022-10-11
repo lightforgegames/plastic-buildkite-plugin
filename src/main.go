@@ -81,9 +81,20 @@ func main() {
 		fmt.Printf("Failed to get comment: : %v.\n%s\n", err, comment)
 		os.Exit(1)
 	}
+
+	if out, err := exec.Command("buildkite-agent", "meta-data", "set", "lightforge:plastic.branch", branch).CombinedOutput(); err != nil {
+		fmt.Printf("Failed to set branch metadata: : %v.\n%s\n", err, string(out))
+		os.Exit(1)
+	}
+
+	if out, err := exec.Command("buildkite-agent", "meta-data", "set", "lightforge:plastic.changeset", revision).CombinedOutput(); err != nil {
+		fmt.Printf("Failed to set changeset metadata: : %v.\n%s\n", err, string(out))
+		os.Exit(1)
+	}
+
 	commitMetadata := fmt.Sprintf("commit %s\n\n\t%s", revision, comment)
 	if out, err := exec.Command("buildkite-agent", "meta-data", "set", "buildkite:git:commit", commitMetadata).CombinedOutput(); err != nil {
-		fmt.Printf("Failed to set metadata: : %v.\n%s\n", err, string(out))
+		fmt.Printf("Failed to set buildkite:git:commit metadata: : %v.\n%s\n", err, string(out))
 		os.Exit(1)
 	}
 
