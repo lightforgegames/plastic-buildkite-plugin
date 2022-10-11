@@ -82,12 +82,12 @@ func main() {
 		os.Exit(1)
 	}
 
-	if out, err := exec.Command("buildkite-agent", "meta-data", "set", "lightforge:plastic.branch", branch).CombinedOutput(); err != nil {
+	if out, err := exec.Command("buildkite-agent", "meta-data", "set", "lightforge:plastic:branch", branch).CombinedOutput(); err != nil {
 		fmt.Printf("Failed to set branch metadata: : %v.\n%s\n", err, string(out))
 		os.Exit(1)
 	}
 
-	if out, err := exec.Command("buildkite-agent", "meta-data", "set", "lightforge:plastic.changeset", revision).CombinedOutput(); err != nil {
+	if out, err := exec.Command("buildkite-agent", "meta-data", "set", "lightforge:plastic:changeset", revision).CombinedOutput(); err != nil {
 		fmt.Printf("Failed to set changeset metadata: : %v.\n%s\n", err, string(out))
 		os.Exit(1)
 	}
