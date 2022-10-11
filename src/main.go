@@ -20,14 +20,13 @@ func Shellout(command string) (string, string, error) {
 	return stdout.String(), stderr.String(), err
 }
 
-func get_comment(changeset int, branch string) (string, error) {
-	query := ""
-	if changeset == -1 {
-		query = fmt.Sprintf("find changeset \"where branch = '%s'\" --format=\"{comment}\" order by changesetId desc LIMIT 1 --nototal", branch)
-	} else {
-		query = fmt.Sprintf("log cs:%d --csformat={comment}", changeset)
-	}
-	out, _, err := Shellout("cm " + query)
+func getHead(branch string) (string, error) {
+	out, _, err := Shellout(fmt.Sprintf("find changeset \"where branch = '%s'\" --format=\"{changesetid}\" order by changesetId desc LIMIT 1 --nototal", branch))
+	return out, err
+}
+
+func getComment(changeset int) (string, error) {
+	out, _, err := Shellout(fmt.Sprintf("cm log cs:%d --csformat={comment}", changeset))
 	return out, err
 }
 
@@ -75,21 +74,29 @@ func main() {
 	changeset := -1
 
 	revision := os.Getenv("BUILDKITE_COMMIT")
-	if !(revision == "" || revision == "HEAD") {
-		// If the revision isn't empty, or head, then set the target to the specified changeset
-		if changeset, err = strconv.Atoi(revision); err != nil || changeset < 1 {
-			fmt.Printf("Invalid changeset specified. Expected a numeric value but got `%s`\n", revision)
+	if revision == "" || revision == "HEAD" {
+		revision, err = getHead(branch)
+		if err != nil {
+			fmt.Printf("failed to get head of branch %q: %v", branch, err)
 			os.Exit(1)
 		}
+	} else {
+		target = "cs:" + revision
 	}
 
+	if changeset, err = strconv.Atoi(revision); err != nil || changeset < 1 {
+		fmt.Printf("Invalid changeset specified. Expected a numeric value but got `%s`\n", revision)
+		os.Exit(1)
+	}
+
+	// If the revision isn't empty, or head, then set the target to the specified changeset
 	if len(target) == 3 {
 		fmt.Printf("Invalid target, expected either a branch or a changeset but got `%s`\n", target)
 		os.Exit(1)
 	}
 
 	// Set metadata before updating, as updating can take minutes.
-	comment, err := get_comment(changeset, branch)
+	comment, err := getComment(changeset)
 	if err != nil {
 		fmt.Printf("Failed to get comment for `%v:%s`\n", changeset, branch)
 		fmt.Printf("Failed to get comment: : %v.\n%s\n", err, comment)
