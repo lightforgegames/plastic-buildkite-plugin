@@ -50,6 +50,9 @@ func main() {
 	branch := os.Getenv("BUILDKITE_BRANCH")
 	target := "br:" + branch
 
+	friendlyBranchName := strings.Trim(branch, "/")
+	friendlyBranchName = strings.Replace(branch, "/", "-", -1)
+
 	changeset := -1
 
 	revision := os.Getenv("BUILDKITE_COMMIT")
@@ -83,6 +86,11 @@ func main() {
 	}
 
 	if out, err := exec.Command("buildkite-agent", "meta-data", "set", "lightforge:plastic:branch", branch).CombinedOutput(); err != nil {
+		fmt.Printf("Failed to set branch metadata: : %v.\n%s\n", err, string(out))
+		os.Exit(1)
+	}
+
+	if out, err := exec.Command("buildkite-agent", "meta-data", "set", "lightforge:plastic:displaybranch", friendlyBranchName).CombinedOutput(); err != nil {
 		fmt.Printf("Failed to set branch metadata: : %v.\n%s\n", err, string(out))
 		os.Exit(1)
 	}
