@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"os"
 	"os/exec"
@@ -9,37 +8,23 @@ import (
 	"strings"
 )
 
-func Shellout(command string) (string, string, error) {
-	const ShellToUse = "bash"
-	var stdout bytes.Buffer
-	var stderr bytes.Buffer
-	cmd := exec.Command(ShellToUse, "-c", command)
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
-	err := cmd.Run()
-	return stdout.String(), stderr.String(), err
-}
-
 func getHead(branch string) (string, error) {
-	out, _, err := Shellout(fmt.Sprintf("find changeset \"where branch = '%s'\" --format=\"{changesetid}\" order by changesetId desc LIMIT 1 --nototal", branch))
-	return out, err
+	out, err := exec.Command("cm", "find", "changeset", fmt.Sprintf(`where branch = '%s'`, branch), `--format={changesetid}`, "order", "by", "changesetId", "desc", "LIMIT", "1", "--nototal").CombinedOutput()
+	return strings.TrimSpace(string(out)), err
 }
 
 func getComment(changeset int) (string, error) {
-	out, _, err := Shellout(fmt.Sprintf("cm log cs:%d --csformat={comment}", changeset))
-	return out, err
+	out, err := exec.Command("cm", "log", fmt.Sprintf("cs:%d", changeset), "--csformat={comment}").CombinedOutput()
+	return strings.TrimSpace(string(out)), err
 }
 
 func main() {
-	appDataPath := os.Getenv("LocalAppData")
-	fmt.Printf("Using Appdata: %q\n", appDataPath)
-
 	cd, _ := os.Getwd()
 
 	fmt.Println("go: executing plastic plugin from " + cd)
 	_, err := os.Stat(".plastic/plastic.selector")
 	selectorString := ""
-	if bHasSelector := err == nil; bHasSelector {
+	if err == nil {
 		selectorString = "--selector=.plastic/plastic.selector"
 	}
 
@@ -58,12 +43,6 @@ func main() {
 			fmt.Printf("Failed to create workspace `%s`: %v.\n%s", workspaceName, err, string(out))
 			os.Exit(1)
 		}
-	}
-
-	fmt.Println("Cleaning workspace of any changes...")
-	if out, err := exec.Command("cm", "undo", ".", "-R").CombinedOutput(); err != nil {
-		fmt.Printf("Failed to undo changes: : %v.\n%s", err, string(out))
-		os.Exit(1)
 	}
 
 	// figure out our target branch and changeset.
@@ -105,6 +84,12 @@ func main() {
 	commitMetadata := fmt.Sprintf("commit %s\n\n\t%s", revision, comment)
 	if out, err := exec.Command("buildkite-agent", "meta-data", "set", "buildkite:git:commit", commitMetadata).CombinedOutput(); err != nil {
 		fmt.Printf("Failed to set metadata: : %v.\n%s\n", err, string(out))
+		os.Exit(1)
+	}
+
+	fmt.Println("Cleaning workspace of any changes...")
+	if out, err := exec.Command("cm", "undo", ".", "-R").CombinedOutput(); err != nil {
+		fmt.Printf("Failed to undo changes: : %v.\n%s", err, string(out))
 		os.Exit(1)
 	}
 
