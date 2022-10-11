@@ -7,5 +7,3 @@ configuration:
   properties:
     workspacename:
       type:  string
-    workspacepath:
-      type: string
