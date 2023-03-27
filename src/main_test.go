@@ -10,12 +10,12 @@ func Test_friendlyBranchName(t *testing.T) {
 		wantErr    bool
 	}{
 		{"/main to main", "/main", "main", false},
-		{"no leading slash", "main", "", true},
+		{"no leading slash", "main", "main", false},
 		{"no trailing slash", "main/", "", true},
 		{"/main/child to main-child", "/main/child", "main-child", false},
-		{"main/child errors", "main/child", "", true},
+		{"main/child succeeds", "main/child", "main-child", false},
 		{"/main/child_branch", "/main/child_branch", "main-child_branch", false},
-		{"main/child_branch", "main/child_branch", "", true},
+		{"main/child_branch", "main/child_branch", "main-child_branch", false},
 
 		{"invalid characters in branch", "main/with-dashes", "", true},
 	}

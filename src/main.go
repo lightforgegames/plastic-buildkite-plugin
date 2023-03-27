@@ -24,10 +24,6 @@ func getFriendlyBranchName(branchName string) (string, error) {
 		return "", errors.New("dashes not allowed")
 	}
 
-	if !strings.HasPrefix(branchName, "/") {
-		return "", errors.New("branch must start with /")
-	}
-
 	if strings.HasSuffix(branchName, "/") {
 		return "", errors.New("branch must not end with /")
 	}
