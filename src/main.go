@@ -55,7 +55,7 @@ func getUpdateTarget() (string, error) {
 	if alreadyInitialised == "true" {
 		plasticBranch, _ := getMetadata("lightforge:plastic:branch", "")
 		plasticCs, _ := getMetadata("lightforge:plastic:changeset", "")
-		fmt.Printf("using br:%s and cs:%s from metadata", plasticBranch, plasticCs)
+		fmt.Printf("using br:%s and cs:%s from metadata\n", plasticBranch, plasticCs)
 
 		return fmt.Sprintf("cs:%s", plasticCs), nil
 	}
