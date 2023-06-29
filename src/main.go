@@ -145,6 +145,10 @@ func main() {
 		exitAndError(fmt.Sprintf("Failed to undo changes: : %v.\n%s\n", err, string(out)))
 	}
 
+	fmt.Println("Removing private files...")
+	numRemoved := len(DeletePrivateFiles("."))
+	fmt.Printf("Removed %d private files\n", numRemoved)
+
 	fmt.Println("Setting workspace to " + target)
 	if out, err := exec.Command("cm", "switch", target).CombinedOutput(); err != nil {
 		exitAndError(fmt.Sprintf("Failed to update workspace: : %v.\n%s\n", err, string(out)))
